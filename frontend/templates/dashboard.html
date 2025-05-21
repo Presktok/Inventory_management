@@ -694,8 +694,8 @@
             <a href="#">Our Services</a>
           </nav>
           <div class="user-actions">
-            <a href="/login" class="btn btn-ghost">Log In</a>
-            <a href="/signup" class="btn btn-primary">Sign Up</a>
+            <a href="{{ url_for('login') }}" class="btn btn-ghost">Log In</a>
+            <a href="{{ url_for('signup') }}" class="btn btn-primary">Sign Up</a>
           </div>
         </div>
       </div>
@@ -806,7 +806,7 @@
         <h2 class="cta-title">Get started with Inventory Management today</h2>
         <p class="cta-description">Join thousands of businesses that have transformed their inventory management process. Our platform is designed to help you increase efficiency, reduce costs, and grow your business.</p>
         <div class="cta-buttons">
-          <a href="signup.html" class="btn btn-primary btn-large">Get Started</a>
+          <a href="{{ url_for('signup') }}" class="btn btn-primary btn-large">Get Started</a>
           <a href="#" class="btn btn-ghost btn-large">Contact Sales</a>
         </div>
       </div>
@@ -910,3 +910,5 @@
     });
   });
 </script>
+</body>
+</html>

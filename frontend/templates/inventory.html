@@ -8,6 +8,8 @@
   <meta name="author" content="Inventory" />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
   <script src="https://unpkg.com/feather-icons"></script>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script src="{{ url_for('static', filename='js/api.js') }}"></script>
   <style>
     :root {
       --primary: #0f4c81;
@@ -330,52 +332,119 @@
         display: inline-block;
       }
     }
+
+    /* Add Item Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+
+    .modal-content {
+      position: relative;
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 2rem;
+      width: 90%;
+      max-width: 500px;
+      border-radius: var(--radius);
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+    }
+
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--muted-foreground);
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
   </style>
 </head>
 <body>
   <div class="app-container">
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">DK</div>
-                    <span class="logo-text">DaeKena</span>
-                </div>
-                <button id="sidebar-toggle" class="sidebar-toggle">
-                    <i data-feather="chevrons-left"></i>
-                </button>
-            </div>
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">DK</div>
+          <span class="logo-text">DaeKena</span>
+        </div>
+      </div>
 
-            <nav class="sidebar-nav">
-                <a href="index.html" class="nav-link">
-                    <span>Dashboard</span>
-                </a>
-                <a href="/inventory" class="nav-link">
-                   
-                    <span>Inventory</span>
-                </a>
-                <a href="/order" class="nav-link">
-                    
-                    <span>Orders</span>
-                </a>
-                <a href="/routes" class="nav-link">
-                  
-                    <span>Routes</span>
-                <a href="#" class="nav-link">
-                    
-                    <span>Settings</span>
-                </a>
-            </nav>
+      <nav class="sidebar-nav">
+        <a href="{{ url_for('index') }}" class="nav-link">
+          <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('inventory') }}" class="nav-link nav-link-active">
+          <span>Inventory</span>
+        </a>
+        <a href="{{ url_for('orders') }}" class="nav-link">
+          <span>Orders</span>
+        </a>
+        <a href="{{ url_for('routes') }}" class="nav-link">
+          <span>Routes</span>
+        </a>
+        <a href="#" class="nav-link">
+          <span>Settings</span>
+        </a>
+      </nav>
 
-            <div class="sidebar-footer">
-                <button class="logout-btn">
-                    <i data-feather="log-out"></i>
-                    <span>Logout</span>
-                </button>
-            </div>
-        </aside>
+      <div class="sidebar-footer">
+        <button class="logout-btn">
+          <i data-feather="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
       <header class="header">
         <div class="header-actions">
@@ -392,7 +461,7 @@
             <h1>Inventory</h1>
             <p class="text-muted">Manage your inventory items</p>
           </div>
-          <button class="btn btn-primary"><i data-feather="plus"></i> Add Item</button>
+          <button id="openAddItemModal" class="btn btn-primary"><i data-feather="plus"></i> Add Item</button>
         </div>
 
         <div class="card">
@@ -442,53 +511,123 @@
     </main>
   </div>
 
+  <!-- Add Item Modal -->
+  <div id="addItemModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3>Add New Item</h3>
+        <button class="close-modal" id="closeAddItemModal">&times;</button>
+      </div>
+      <form id="addItemForm">
+        <div class="form-group">
+          <label for="itemName">Item Name</label>
+          <input type="text" id="itemName" name="name" required placeholder="Enter item name">
+        </div>
+        <div class="form-group">
+          <label for="itemCategory">Category</label>
+          <select id="itemCategory" name="category" required>
+            <option value="">Select a category</option>
+            <option value="Electronics">Electronics</option>
+            <option value="Clothing">Clothing</option>
+            <option value="Food Products">Food Products</option>
+            <option value="Pharmaceuticals">Pharmaceuticals</option>
+            <option value="Home Goods">Home Goods</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="itemQuantity">Quantity</label>
+          <input type="number" id="itemQuantity" name="quantity" required min="0" placeholder="Enter quantity">
+        </div>
+        <div class="form-group">
+          <label for="itemPrice">Price</label>
+          <input type="number" id="itemPrice" name="price" required min="0" step="0.01" placeholder="Enter price">
+        </div>
+        <div class="form-group">
+          <label for="itemDescription">Description (Optional)</label>
+          <textarea id="itemDescription" name="description" placeholder="Enter item description"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-outline" id="cancelAddItem">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Item</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
     feather.replace();
-
-    const inventoryItems = [
-      { id: "INV-001", name: "Samsung Galaxy S21", category: "Electronics", stock: 45, price: "$799.99", status: "In Stock" },
-      { id: "INV-002", name: "Leather Jacket", category: "Clothing", stock: 12, price: "$199.99", status: "Low Stock" },
-      { id: "INV-003", name: "Organic Bananas", category: "Food Products", stock: 230, price: "$1.99", status: "In Stock" },
-      { id: "INV-004", name: "Ibuprofen 200mg", category: "Pharmaceuticals", stock: 85, price: "$8.49", status: "In Stock" },
-      { id: "INV-005", name: "Stainless Steel Pot", category: "Home Goods", stock: 28, price: "$45.99", status: "In Stock" },
-      { id: "INV-006", name: "AirPods Pro", category: "Electronics", stock: 5, price: "$249.99", status: "Low Stock" },
-      { id: "INV-007", name: "Cotton T-Shirt", category: "Clothing", stock: 78, price: "$19.99", status: "In Stock" },
-      { id: "INV-008", name: "Fresh Milk", category: "Food Products", stock: 0, price: "$3.49", status: "Out of Stock" }
-    ];
 
     const tableBody = document.getElementById('inventory-table-body');
     const searchInput = document.getElementById('inventory-search');
     const categoryFilter = document.getElementById('category-filter');
+    const addItemModal = document.getElementById('addItemModal');
+    const openAddItemModal = document.getElementById('openAddItemModal');
+    const closeAddItemModal = document.getElementById('closeAddItemModal');
+    const cancelAddItem = document.getElementById('cancelAddItem');
+    const addItemForm = document.getElementById('addItemForm');
+
+    // Modal functions
+    function openModal() {
+      addItemModal.style.display = 'block';
+    }
+
+    function closeModal() {
+      addItemModal.style.display = 'none';
+      addItemForm.reset();
+    }
+
+    openAddItemModal.addEventListener('click', openModal);
+    closeAddItemModal.addEventListener('click', closeModal);
+    cancelAddItem.addEventListener('click', closeModal);
+
+    window.addEventListener('click', (e) => {
+      if (e.target === addItemModal) {
+        closeModal();
+      }
+    });
+
+    function getStatusBadgeClass(stock) {
+      if (stock === 0) return 'badge destructive';
+      if (stock <= 10) return 'badge outline';
+      return 'badge';
+    }
+
+    function getStatus(stock) {
+      if (stock === 0) return 'Out of Stock';
+      if (stock <= 10) return 'Low Stock';
+      return 'In Stock';
+    }
 
     function renderInventoryTable(items) {
-  tableBody.innerHTML = '';
-  if (items.length === 0) {
-    tableBody.innerHTML = '<tr><td colspan="6">No items found.</td></tr>';
-    return;
-  }
-  items.forEach(item => {
-    let badgeClass = 'badge';
-    if (item.status === 'Low Stock') badgeClass += ' outline';
-    if (item.status === 'Out of Stock') badgeClass += ' destructive';
+      tableBody.innerHTML = '';
+      if (items.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6">No items found.</td></tr>';
+        return;
+      }
+      items.forEach(item => {
+        const status = getStatus(item.quantity);
+        const badgeClass = getStatusBadgeClass(item.quantity);
 
-    tableBody.innerHTML += `
-      <tr>
-        <td>${item.id}</td>
-        <td>${item.name}</td>
-        <td>${item.category}</td>
-        <td>${item.stock}</td>
-        <td>${item.price}</td>
-        <td><span class="${badgeClass}">${item.status}</span></td>
-      </tr>
-    `;
-  });
-}
+        tableBody.innerHTML += `
+          <tr>
+            <td>${item._id}</td>
+            <td>${item.name}</td>
+            <td>${item.category}</td>
+            <td>${item.quantity}</td>
+            <td>$${item.price.toFixed(2)}</td>
+            <td><span class="${badgeClass}">${status}</span></td>
+          </tr>
+        `;
+      });
+    }
+
+    let allItems = [];
 
     function filterInventory() {
       const search = searchInput.value.toLowerCase();
       const category = categoryFilter.value;
-      const filtered = inventoryItems.filter(item =>
-        (item.name.toLowerCase().includes(search) || item.id.toLowerCase().includes(search)) &&
+      const filtered = allItems.filter(item =>
+        (item.name.toLowerCase().includes(search) || item._id.toLowerCase().includes(search)) &&
         (category === '' || item.category === category)
       );
       renderInventoryTable(filtered);
@@ -497,11 +636,46 @@
     searchInput.addEventListener('input', filterInventory);
     categoryFilter.addEventListener('change', filterInventory);
 
-    
-    
-    
     document.getElementById("current-year").textContent = new Date().getFullYear();
-    renderInventoryTable(inventoryItems);
+
+    // Function to load inventory items
+    async function loadInventory() {
+      try {
+        const response = await inventoryApi.getAllItems();
+        allItems = response.data || [];
+        renderInventoryTable(allItems);
+      } catch (error) {
+        console.error('Error loading inventory:', error);
+        alert('Failed to load inventory items');
+      }
+    }
+
+    // Handle form submission
+    addItemForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(addItemForm);
+
+      const itemData = {
+        name: formData.get('name'),
+        quantity: parseInt(formData.get('quantity')),
+        category: formData.get('category'),
+        price: parseFloat(formData.get('price')),
+        description: formData.get('description')
+      };
+
+      try {
+        await inventoryApi.createItem(itemData);
+        closeModal();
+        loadInventory(); // Reload the inventory list
+        alert('Item created successfully');
+      } catch (error) {
+        console.error('Error creating item:', error);
+        alert('Failed to create item: ' + error.message);
+      }
+    });
+
+    // Load inventory when page loads
+    document.addEventListener('DOMContentLoaded', loadInventory);
   </script>
 </body>
 </html>
