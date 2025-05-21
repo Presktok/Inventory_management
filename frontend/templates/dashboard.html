@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Management | supplychain.com</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #FF8C00;
+      --primary-hover: #E67E00;
+      --black: #1A1F2C;
+      --white: #FFFFFF;
+      --gray-100: #F9FAFB;
+      --gray-200: #F1F5F9;
+      --gray-300: #E2E8F0;
+      --gray-400: #94A3B8;
+      --gray-500: #64748B;
+      --gray-800: #1E293B;
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      --radius-sm: 0.125rem;
+      --radius-md: 0.375rem;
+      --radius-lg: 0.5rem;
+      --radius-full: 9999px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+
+    /* Header & Navigation */
+    .header {
+      background-color: var(--black);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: var(--shadow-md);
+    }
+
+    .container {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      height: 70px;
+    }
+
+    .logo {
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--white);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo i {
+      color: var(--primary);
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-grow: 1;
+      margin-left: 2rem;
+    }
+
+    .main-nav {
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    .main-nav a {
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 1rem;
+      opacity: 0.9;
+      transition: all 0.2s ease;
+      position: relative;
+    }
+
+    .main-nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -5px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background-color: var(--primary);
+      transition: width 0.3s ease;
+    }
+
+    .main-nav a:hover {
+      opacity: 1;
+      color: var(--primary);
+    }
+
+    .main-nav a:hover::after {
+      width: 100%;
+    }
+
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-left: auto;  /* This pushes buttons to the right */
+    }
+
+    .location-selector,
+    .language-selector {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      color: var(--gray-300);
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .location-selector:hover,
+    .language-selector:hover {
+      color: var(--white);
+    }
+
+    .location-selector .flag {
+      width: 18px;
+      height: 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      border-radius: var(--radius-md);
+      font-weight: 500;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      text-decoration: none;
+      border: none;
+      font-size: 0.875rem;
+    }
+
+    .btn-ghost {
+      background-color: transparent;
+      color: var(--white);
+      border: 1px solid var(--gray-500);
+    }
+
+    .btn-ghost:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--white);
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    /* Mobile Navigation */
+    .menu-toggle {
+      display: none;
+      background: none;
+      border: none;
+      color: var(--white);
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* Hero Section */
+    .hero {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.65), rgba(0, 0, 0, 0.65)), url('https://images.unsplash.com/photo-1606185540834-d6e7483ee1a4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80');
+      background-size: cover;
+      background-position: center;
+      height: 600px;
+      display: flex;
+      align-items: center;
+      position: relative;
+    }
+
+    .hero-content {
+      width: 100%;
+      max-width: 950px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .learn-badge {
+      background-color: rgba(255, 140, 0, 0.2);
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius-full);
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--primary);
+      border: 1px solid rgba(255, 140, 0, 0.3);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      max-width: fit-content;
+    }
+
+    .learn-badge:hover {
+      background-color: rgba(255, 140, 0, 0.3);
+    }
+
+    .headline {
+      font-size: 3.5rem;
+      font-weight: 700;
+      line-height: 1.2;
+      max-width: 800px;
+      letter-spacing: -0.02em;
+    }
+
+    .headline span {
+      color: var(--primary);
+    }
+
+    .search-container {
+      width: 100%;
+      max-width: 600px;
+      background-color: var(--white);
+      border-radius: var(--radius-full);
+      padding: 0.25rem;
+      display: flex;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .search-container input {
+      flex-grow: 1;
+      background: transparent;
+      border: none;
+      padding: 0.875rem 1.5rem;
+      font-size: 1rem;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .search-container button {
+      background-color: var(--primary);
+      color: var(--white);
+      border: none;
+      border-radius: var(--radius-full);
+      padding: 0.875rem 2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      font-family: inherit;
+    }
+
+    .search-container button:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .frequent-searches {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+
+    .frequent-searches span {
+      color: var(--gray-300);
+    }
+
+    .tag {
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: var(--white);
+      padding: 0.375rem 1rem;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .tag:hover {
+      background-color: rgba(255, 255, 255, 0.2);
+    }
+
+    /* Feature Cards */
+    .features {
+      padding: 5rem 0;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .section-title h2 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--black);
+    }
+
+    .section-title p {
+      color: var(--gray-500);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background-color: var(--white);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .card-icon {
+      background-color: var(--gray-200);
+      height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+      color: var(--primary);
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+      color: var(--black);
+    }
+
+    .card-text {
+      color: var(--gray-500);
+      font-size: 0.875rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .card-link {
+      color: var(--primary);
+      font-weight: 500;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      transition: gap 0.3s ease;
+      font-size: 0.875rem;
+    }
+
+    .card-link:hover {
+      gap: 0.5rem;
+    }
+
+    /* Stats Section */
+    .stats {
+      background-color: var(--black);
+      color: var(--white);
+      padding: 5rem 0;
+    }
+
+    .stats-container {
+      display: flex;
+      justify-content: space-between;
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      flex-wrap: wrap;
+      gap: 2rem;
+    }
+
+    .stat {
+      text-align: center;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--gray-300);
+      font-size: 1rem;
+    }
+
+    /* CTA Section */
+    .cta {
+      background-color: var(--white);
+      padding: 5rem 0;
+    }
+
+    .cta-container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 1rem;
+      display: flex;
+      align-items: center;
+      gap: 3rem;
+    }
+
+    .cta-content {
+      flex: 1;
+    }
+
+    .cta-image {
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .cta-image img {
+      width: 100%;
+      height: auto;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .cta-subtitle {
+      color: var(--primary);
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .cta-title {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
+      line-height: 1.2;
+      color: var(--black);
+    }
+
+    .cta-description {
+      color: var(--gray-500);
+      margin-bottom: 2rem;
+      max-width: 500px;
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn-large {
+      padding: 0.75rem 1.5rem;
+      font-size: 1rem;
+    }
+
+    /* Footer */
+    .footer {
+      background-color: var(--black);
+      color: var(--white);
+      padding: 5rem 0 2rem;
+    }
+
+    .footer-container {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    .footer-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 3rem;
+      margin-bottom: 4rem;
+    }
+
+    .footer-col h3 {
+      font-size: 1.125rem;
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+
+    .footer-links {
+      list-style: none;
+    }
+
+    .footer-links li:not(:last-child) {
+      margin-bottom: 0.75rem;
+    }
+
+    .footer-links a {
+      color: var(--gray-400);
+      text-decoration: none;
+      transition: color 0.2s ease;
+      font-size: 0.875rem;
+    }
+
+    .footer-links a:hover {
+      color: var(--primary);
+    }
+
+    .footer-bottom {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 2rem;
+      border-top: 1px solid var(--gray-800);
+    }
+
+    .footer-copyright {
+      color: var(--gray-400);
+      font-size: 0.875rem;
+    }
+
+    .footer-social {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .footer-social a {
+      color: var(--gray-400);
+      font-size: 1.25rem;
+      transition: color 0.2s ease;
+    }
+
+    .footer-social a:hover {
+      color: var(--primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 992px) {
+      .headline {
+        font-size: 2.75rem;
+      }
+      
+      .cta-container {
+        flex-direction: column-reverse;
+      }
+      
+      .cta-image {
+        max-width: 100%;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        position: relative;
+      }
+      
+      .menu-toggle {
+        display: block;
+      }
+      
+      .nav-container {
+        position: absolute;
+        top: 70px;
+        left: 0;
+        right: 0;
+        background-color: var(--black);
+        padding: 1rem;
+        display: none;
+        flex-direction: column;
+        gap: 1rem;
+        box-shadow: var(--shadow-md);
+        border-top: 1px solid var(--gray-800);
+        margin-left: 0;
+      }
+      
+      .nav-container.active {
+        display: flex;
+      }
+      
+      .main-nav {
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .user-actions {
+        flex-direction: column;
+        align-items: flex-start;
+        width: 100%;
+        margin-left: 0;
+      }
+      
+      .headline {
+        font-size: 2rem;
+      }
+      
+      .hero {
+        height: auto;
+        padding: 5rem 0;
+      }
+      
+      .search-container {
+        flex-direction: column;
+        border-radius: var(--radius-lg);
+      }
+      
+      .search-container input {
+        width: 100%;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      }
+      
+      .search-container button {
+        width: 100%;
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+      }
+      
+      .stats-container {
+        flex-direction: column;
+        text-align: center;
+      }
+      
+      .cta-buttons {
+        flex-direction: column;
+      }
+      
+      .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="container">
+      <div class="navbar">
+        <a href="#" class="logo">
+          <i class="fas fa-boxes"></i>
+          Inventory
+        </a>
+        
+        <button class="menu-toggle" id="menuToggle">
+          <i class="fas fa-bars"></i>
+        </button>
+        
+        <div class="nav-container" id="navContainer">
+          <nav class="main-nav">
+            <a href="#">All Categories</a>
+            <a href="#">Featured Selections</a>
+            <a href="#">Order Protections</a>
+            <a href="#">Our Services</a>
+          </nav>
+          <div class="user-actions">
+            <a href="/login" class="btn btn-ghost">Log In</a>
+            <a href="/signup" class="btn btn-primary">Sign Up</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-content">
+      <div class="learn-badge">
+        <i class="fas fa-play-circle"></i>
+        Learn about Inventory
+      </div>
+      
+      <h1 class="headline">The leading <span>B2B ecommerce platform</span> for global trade</h1>
+      
+      <div class="search-container">
+        <input type="text" placeholder="Search for products, brands, or categories..." id="searchInput">
+        <button id="searchButton">
+          <i class="fas fa-search"></i>
+          Search
+        </button>
+      </div>
+      
+      <div class="frequent-searches">
+        <span>Frequently searched:</span>
+        <button class="tag" data-search="warehouse tools"><i class="fas fa-tag"></i> Warehouse tools</button>
+        <button class="tag" data-search="truck tires"><i class="fas fa-tag"></i> Truck tires</button>
+        <button class="tag" data-search="order labels"><i class="fas fa-tag"></i> Order labels</button>
+        <button class="tag" data-search="packaging"><i class="fas fa-tag"></i> Packaging</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Feature Cards Section -->
+  <section class="features">
+    <div class="section-title">
+      <h2>Our Comprehensive Solutions</h2>
+      <p>We provide end-to-end services to streamline your inventory management process</p>
+    </div>
+    
+    <div class="cards">
+      <div class="card">
+        <div class="card-icon">
+          <i class="fas fa-truck-loading"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Inventory Management</h3>
+          <p class="card-text">Track your stock levels in real-time with our advanced inventory management system. Never miss a sale due to stockouts.</p>
+          <a href="#" class="card-link">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Analytics & Reporting</h3>
+          <p class="card-text">Make data-driven decisions with our comprehensive analytics dashboard and custom reporting tools.</p>
+          <a href="#" class="card-link">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-icon">
+          <i class="fas fa-globe"></i>
+        </div>
+        <div class="card-content">
+          <h3 class="card-title">Global Marketplace</h3>
+          <p class="card-text">Connect with suppliers and buyers from around the world to expand your business opportunities.</p>
+          <a href="#" class="card-link">Learn more <i class="fas fa-arrow-right"></i></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="stats-container">
+      <div class="stat">
+        <div class="stat-value">10M+</div>
+        <div class="stat-label">Active Users</div>
+      </div>
+      
+      <div class="stat">
+        <div class="stat-value">190+</div>
+        <div class="stat-label">Countries Served</div>
+      </div>
+      
+      <div class="stat">
+        <div class="stat-value">$4.2B</div>
+        <div class="stat-label">Annual GMV</div>
+      </div>
+      
+      <div class="stat">
+        <div class="stat-value">24/7</div>
+        <div class="stat-label">Customer Support</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="cta">
+    <div class="cta-container">
+      <div class="cta-content">
+        <div class="cta-subtitle">Ready to streamline your operations?</div>
+        <h2 class="cta-title">Get started with Inventory Management today</h2>
+        <p class="cta-description">Join thousands of businesses that have transformed their inventory management process. Our platform is designed to help you increase efficiency, reduce costs, and grow your business.</p>
+        <div class="cta-buttons">
+          <a href="signup.html" class="btn btn-primary btn-large">Get Started</a>
+          <a href="#" class="btn btn-ghost btn-large">Contact Sales</a>
+        </div>
+      </div>
+      
+      <div class="cta-image">
+        <img src="https://images.unsplash.com/photo-1553413077-190dd305871c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1035&q=80" alt="Inventory Management Dashboard">
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <h3>About</h3>
+          <ul class="footer-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Our Services</a></li>
+            <li><a href="#">Leadership</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Press & News</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h3>Products</h3>
+          <ul class="footer-links">
+            <li><a href="#">Inventory Management</a></li>
+            <li><a href="#">Order Fulfillment</a></li>
+            <li><a href="#">Analytics & Reporting</a></li>
+            <li><a href="#">Global Marketplace</a></li>
+            <li><a href="#">Supplier Network</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h3>Resources</h3>
+          <ul class="footer-links">
+            <li><a href="#">Help Center</a></li>
+            <li><a href="#">Documentation</a></li>
+            <li><a href="#">API Reference</a></li>
+            <li><a href="#">Community Forums</a></li>
+            <li><a href="#">Blog & Insights</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-col">
+          <h3>Legal</h3>
+          <ul class="footer-links">
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Cookie Policy</a></li>
+            <li><a href="#">Service Level Agreement</a></li>
+            <li><a href="#">Compliance</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <div class="footer-copyright">
+          &copy; 2023 Inventory Management by Bandi.com. All rights reserved.
+        </div>
+        
+        <div class="footer-social">
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-linkedin"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+          <a href="#"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.querySelector('.auth-form');
+    
+    // Check if already logged in
+    if (sessionStorage.getItem('isLoggedIn')) {
+      window.location.href = 'index.html';
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      // Simple validation (replace with real auth in production)
+      if (email === 'admin@example.com' && password === 'admin123') {
+        // Set session flag
+        sessionStorage.setItem('isLoggedIn', 'true');
+        
+        // Redirect to index
+        window.location.href = 'index.html';
+      } else {
+        alert('Invalid credentials! Try: admin@example.com / admin123');
+      }
+    });
+  });
+</script>

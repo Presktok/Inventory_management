@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sign Up | DaeKena Logistics</title>
+    <meta name="description" content="DaeKena Logistics Management System" />
+    <meta name="author" content="DaeKena" />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+
+    <style>
+      :root {
+        --primary-color: #ff7a00;
+        --primary-hover: #e96c00;
+        --text-muted: #6c757d;
+        --input-bg: #f9f9f9;
+        --input-border: #ccc;
+        --card-bg: #fff;
+        --border-radius: 8px;
+        --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
+        --font-family: "Inter", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body.auth-page {
+        background-color: #f2f2f2;
+        font-family: var(--font-family);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .auth-container {
+        max-width: 480px;
+        width: 100%;
+        padding: 24px;
+      }
+
+      .auth-form-container {
+        background: var(--card-bg);
+        padding: 36px;
+        border-radius: var(--border-radius);
+        box-shadow: var(--shadow-md);
+        text-align: center;
+      }
+
+      .auth-logo {
+        margin-bottom: 28px;
+      }
+
+      .logo-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary-color);
+        color: white;
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        border-radius: 12px;
+        font-size: 20px;
+        margin-bottom: 12px;
+        user-select: none;
+      }
+
+      .auth-logo h1 {
+        font-size: 20px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .auth-logo .text-muted {
+        font-size: 14px;
+        color: var(--text-muted);
+      }
+
+      .auth-card-header h2 {
+        font-size: 22px;
+        font-weight: 600;
+      }
+
+      .auth-card-header p {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-top: 6px;
+        margin-bottom: 20px;
+      }
+
+      .auth-card-content form {
+        text-align: left;
+      }
+
+      .form-row {
+        display: flex;
+        gap: 20px;
+        margin-bottom: 18px;
+      }
+
+      .form-group {
+        flex: 1;
+        margin-bottom: 18px;
+      }
+
+      .auth-form label {
+        display: block;
+        font-size: 14px;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+
+      .auth-form input[type="text"],
+      .auth-form input[type="email"],
+      .auth-form input[type="password"] {
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid var(--input-border);
+        border-radius: var(--border-radius);
+        background-color: var(--input-bg);
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+      }
+
+      .auth-form input:focus {
+        border-color: var(--primary-color);
+        outline: none;
+      }
+
+      .form-check {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .form-check input[type="checkbox"] {
+        margin-right: 8px;
+        width: 16px;
+        height: 16px;
+      }
+
+      .checkbox-label {
+        font-size: 14px;
+        color: #333;
+      }
+
+      .checkbox-label a {
+        color: var(--primary-color);
+        text-decoration: none;
+      }
+
+      .checkbox-label a:hover {
+        text-decoration: underline;
+      }
+
+      .btn {
+        padding: 12px 18px;
+        font-size: 15px;
+        font-weight: 500;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--primary-hover);
+      }
+
+      .btn-block {
+        width: 100%;
+      }
+
+      .auth-link-text {
+        margin-top: 24px;
+        text-align: center;
+      }
+
+      .auth-link-text p {
+        font-size: 14px;
+      }
+
+      .text-primary {
+        color: var(--primary-color);
+        text-decoration: none;
+      }
+
+      .text-primary:hover {
+        text-decoration: underline;
+      }
+
+      .text-muted {
+        color: var(--text-muted);
+      }
+    </style>
+  </head>
+
+  <body class="auth-page">
+    <div class="auth-container">
+      <div class="auth-form-container">
+        <div class="auth-logo">
+          <div class="logo-icon">DK</div>
+          <h1>DaeKena Logistics</h1>
+          <p class="text-muted">Create a new account</p>
+        </div>
+
+        <div class="auth-card">
+          <div class="auth-card-header">
+            <h2>Sign Up</h2>
+            <p>Create an account to access the logistics platform</p>
+          </div>
+
+          <div class="auth-card-content">
+            <form id="signup-form" action="{{ url_for('web.signup') }}" method="POST" class="auth-form" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="firstName">First name</label>
+                  <input id="firstName" name="firstName" type="text" required />
+                </div>
+                <div class="form-group">
+                  <label for="lastName">Last name</label>
+                  <input id="lastName" name="lastName" type="text" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="email">Email address</label>
+                <input id="email" name="email" type="email" required />
+              </div>
+
+              <div class="form-group">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" required />
+              </div>
+
+              <div class="form-group">
+                <label for="confirmPassword">Confirm password</label>
+                <input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  required
+                />
+              </div>
+
+              <div class="form-check">
+                <input type="checkbox" id="agreeTerms" required />
+                <label for="agreeTerms" class="checkbox-label">
+                  I agree to the
+                  <a href="#" class="text-primary">terms of service</a> and
+                  <a href="#" class="text-primary">privacy policy</a>
+                </label>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block">
+                Create account
+              </button>
+            </form>
+
+            <div class="auth-link-text">
+              <p class="text-muted">
+                Already have an account?
+                <a href="/login" class="text-primary">Sign in</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPORTANT: DO NOT REMOVE THIS SCRIPT TAG OR THIS VERY COMMENT! -->
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const form = document.getElementById("signup-form");
+
+        form.addEventListener("submit", (e) => {
+          
+
+          const firstName = form.firstName.value.trim();
+          const lastName = form.lastName.value.trim();
+          const email = form.email.value.trim();
+          const password = form.password.value;
+          const confirmPassword = form.confirmPassword.value;
+          const agreeTerms = form.agreeTerms.checked;
+
+          if (!firstName || !lastName || !email || !password || !confirmPassword) {
+            alert("Please fill in all required fields.");
+            return;
+          }
+
+          if (password !== confirmPassword) {
+            alert("Passwords do not match.");
+            return;
+          }
+
+          if (!agreeTerms) {
+            alert("You must agree to the terms of service and privacy policy.");
+            return;
+          }
+
+          // TODO: Replace this with your actual signup API call
+          console.log("Signing up with:", {
+            firstName,
+            lastName,
+            email,
+            password,
+          });
+
+          alert("Signup successful! Redirecting...");
+          // Uncomment the line below to redirect after signup
+          // window.location.href = "/login.html";
+        });
+      });
+    </script>
+  </body>
+</html>

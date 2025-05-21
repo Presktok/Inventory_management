@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory | Inventory Logistics</title>
+  <meta name="description" content="Logistics Management System" />
+  <meta name="author" content="Inventory" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+  <script src="https://unpkg.com/feather-icons"></script>
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --primary-foreground: #ffffff;
+      --background: #f9fafb;
+      --muted: #f1f5f9;
+      --muted-foreground: #64748b;
+      --border: #e2e8f0;
+      --radius: 0.5rem;
+      --sidebar-width: 16rem;
+      --sidebar-width-collapsed: 4rem;
+      --sidebar-background: #1a1f2c;
+      --sidebar-foreground: #f8fafc;
+      --header-height: 4rem;
+    }
+
+    body {
+      margin: 0;
+      
+      background-color: var(--background);
+      color: #1e293b;
+      font-size: 0.875rem;
+    }
+    html{
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app-container {
+      display: flex;
+    }
+/* Sidebar */
+        .sidebar {
+            background-color: var(--sidebar-background);
+            color: var(--sidebar-foreground);
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid var(--border);
+            transition: width 0.3s ease;
+        }
+
+        .sidebar-header {
+            height: var(--header-height);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+  
+
+    
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: bold;
+    }
+
+    .logo-icon {
+      background-color: var(--primary);
+      color: white;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+    .sidebar-nav {
+            padding: 1rem 0.5rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius);
+            margin-bottom: 0.25rem;
+            color: var(--sidebar-foreground);
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link-active {
+            background-color: rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+            text-decoration: none;
+            
+        }
+
+    
+
+   
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 1rem;
+    }
+
+    .logout-btn {
+      background: none;
+      border: none;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      cursor: pointer;
+      color: #dc2626;
+      font-weight: 500;
+    }
+
+    .main-content {
+      margin-left: 250px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background-color: white;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .profile-btn {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .avatar {
+      width: 32px;
+      height: 32px;
+      background-color: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+    }
+
+    .page-content {
+      padding: 2rem;
+      flex-grow: 1;
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+    }
+
+    .text-muted {
+      color: var(--muted-foreground);
+    }
+
+    .card {
+      background-color: white;
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .card-content {
+      padding: 1.5rem;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: var(--primary-foreground);
+    }
+
+    .btn-outline {
+      background: none;
+      border: 1px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .filters {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .search-field {
+      position: relative;
+      flex: 1;
+      max-width: 300px;
+    }
+
+    .search-field input {
+      width: 100%;
+      padding: 0.5rem 2rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    .search-field i {
+      position: absolute;
+      top: 50%;
+      left: 0.75rem;
+      transform: translateY(-50%);
+      color: var(--muted-foreground);
+    }
+
+    .filter-group select {
+      padding: 0.5rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+    }
+
+    /* Table */
+    .table-container {
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table th,
+    .data-table td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .data-table thead {
+      background-color: var(--muted);
+    }
+
+    .badge {
+      padding: 0.25rem 0.5rem;
+      border-radius: var(--radius);
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: white;
+      background-color: #10b981;
+    }
+
+    .badge.outline {
+      background-color: #facc15;
+      color: #000;
+    }
+
+    .badge.destructive {
+      background-color: #ef4444;
+    }
+
+    .footer {
+      padding: 1rem;
+      text-align: center;
+      font-size: 0.875rem;
+      background-color: #fff;
+      border-top: 1px solid var(--border);
+    }
+
+    @media (max-width: 768px) {
+      .page-header,
+      .filters {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .main-content {
+        margin-left: 0 !important;
+      }
+
+      .mobile-menu-toggle {
+        display: inline-block;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">DK</div>
+                    <span class="logo-text">DaeKena</span>
+                </div>
+                <button id="sidebar-toggle" class="sidebar-toggle">
+                    <i data-feather="chevrons-left"></i>
+                </button>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="index.html" class="nav-link">
+                    <span>Dashboard</span>
+                </a>
+                <a href="/inventory" class="nav-link">
+                   
+                    <span>Inventory</span>
+                </a>
+                <a href="/order" class="nav-link">
+                    
+                    <span>Orders</span>
+                </a>
+                <a href="/routes" class="nav-link">
+                  
+                    <span>Routes</span>
+                <a href="#" class="nav-link">
+                    
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button class="logout-btn">
+                    <i data-feather="log-out"></i>
+                    <span>Logout</span>
+                </button>
+            </div>
+        </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <header class="header">
+        <div class="header-actions">
+          <button class="btn btn-outline"><i data-feather="bell"></i></button>
+          <button class="profile-btn">
+            <div class="avatar">JD</div>
+          </button>
+        </div>
+      </header>
+
+      <div class="page-content">
+        <div class="page-header">
+          <div>
+            <h1>Inventory</h1>
+            <p class="text-muted">Manage your inventory items</p>
+          </div>
+          <button class="btn btn-primary"><i data-feather="plus"></i> Add Item</button>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2>Inventory Items</h2>
+          </div>
+          <div class="card-content">
+            <div class="filters">
+              <div class="search-field">
+                <i data-feather="search"></i>
+                <input type="search" id="inventory-search" placeholder="Search items..." />
+              </div>
+              <div class="filter-group">
+                <select id="category-filter">
+                  <option value="">All Categories</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Clothing">Clothing</option>
+                  <option value="Food Products">Food Products</option>
+                  <option value="Pharmaceuticals">Pharmaceuticals</option>
+                  <option value="Home Goods">Home Goods</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Item ID</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Stock</th>
+                    <th>Price</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="inventory-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer class="footer">
+        &copy; <span id="current-year"></span> DaeKena Logistics. All rights reserved.
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    feather.replace();
+
+    const inventoryItems = [
+      { id: "INV-001", name: "Samsung Galaxy S21", category: "Electronics", stock: 45, price: "$799.99", status: "In Stock" },
+      { id: "INV-002", name: "Leather Jacket", category: "Clothing", stock: 12, price: "$199.99", status: "Low Stock" },
+      { id: "INV-003", name: "Organic Bananas", category: "Food Products", stock: 230, price: "$1.99", status: "In Stock" },
+      { id: "INV-004", name: "Ibuprofen 200mg", category: "Pharmaceuticals", stock: 85, price: "$8.49", status: "In Stock" },
+      { id: "INV-005", name: "Stainless Steel Pot", category: "Home Goods", stock: 28, price: "$45.99", status: "In Stock" },
+      { id: "INV-006", name: "AirPods Pro", category: "Electronics", stock: 5, price: "$249.99", status: "Low Stock" },
+      { id: "INV-007", name: "Cotton T-Shirt", category: "Clothing", stock: 78, price: "$19.99", status: "In Stock" },
+      { id: "INV-008", name: "Fresh Milk", category: "Food Products", stock: 0, price: "$3.49", status: "Out of Stock" }
+    ];
+
+    const tableBody = document.getElementById('inventory-table-body');
+    const searchInput = document.getElementById('inventory-search');
+    const categoryFilter = document.getElementById('category-filter');
+
+    function renderInventoryTable(items) {
+  tableBody.innerHTML = '';
+  if (items.length === 0) {
+    tableBody.innerHTML = '<tr><td colspan="6">No items found.</td></tr>';
+    return;
+  }
+  items.forEach(item => {
+    let badgeClass = 'badge';
+    if (item.status === 'Low Stock') badgeClass += ' outline';
+    if (item.status === 'Out of Stock') badgeClass += ' destructive';
+
+    tableBody.innerHTML += `
+      <tr>
+        <td>${item.id}</td>
+        <td>${item.name}</td>
+        <td>${item.category}</td>
+        <td>${item.stock}</td>
+        <td>${item.price}</td>
+        <td><span class="${badgeClass}">${item.status}</span></td>
+      </tr>
+    `;
+  });
+}
+
+    function filterInventory() {
+      const search = searchInput.value.toLowerCase();
+      const category = categoryFilter.value;
+      const filtered = inventoryItems.filter(item =>
+        (item.name.toLowerCase().includes(search) || item.id.toLowerCase().includes(search)) &&
+        (category === '' || item.category === category)
+      );
+      renderInventoryTable(filtered);
+    }
+
+    searchInput.addEventListener('input', filterInventory);
+    categoryFilter.addEventListener('change', filterInventory);
+
+    
+    
+    
+    document.getElementById("current-year").textContent = new Date().getFullYear();
+    renderInventoryTable(inventoryItems);
+  </script>
+</body>
+</html>
