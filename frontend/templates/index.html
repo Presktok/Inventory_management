@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DaeKena Logistics - Dashboard</title>
+    <title>Logistics - Dashboard</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://unpkg.com/feather-icons"></script>
     <style>
@@ -83,7 +83,7 @@
                 <a href="{{ url_for('orders') }}" class="nav-link">
                     <span>Orders</span>
                 </a>
-                <a href="{{ url_for('routes') }}" class="nav-link">
+                <a href="routes.html" class="nav-link">
                     <span>Routes</span>
                 </a>
                 <a href="#" class="nav-link">
@@ -150,8 +150,6 @@
                     </div>
                 </div>
             </div>
-
-            <a href="{{ url_for('signup') }}" class="btn btn-primary btn-large">Get Started</a>
         </main>
     </div>
 
