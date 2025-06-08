@@ -21,6 +21,9 @@ A full-stack inventory management system built with Flask and MongoDB.
 ├── requirements.txt    # Python dependencies
 └── users.json         # User configuration
 ```
+## Screenshots
+![Uploading Screenshot 2025-06-08 183644.png…]()
+
 
 ## Prerequisites
 
