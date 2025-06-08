@@ -3,6 +3,9 @@ from datetime import datetime
 from bson import ObjectId
 from backend.models.inventory import InventoryItem
 from backend.algorithms.order_routing import OrderRouter, Order
+import json
+from bson import json_util
+from flask import current_app
 
 inventory_bp = Blueprint('inventory', __name__)
 router = OrderRouter()
@@ -38,6 +41,25 @@ def get_inventory():
             'status': 'success',
             'data': items
         }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@inventory_bp.route('/inventory/<item_id>', methods=['GET'])
+def get_item_by_id(item_id):
+    try:
+        item = InventoryItem.get_by_id(item_id)
+        if item:
+            return jsonify({
+                'status': 'success',
+                'data': item
+            }), 200
+        return jsonify({
+            'status': 'error',
+            'message': 'Item not found'
+        }), 404
     except Exception as e:
         return jsonify({
             'status': 'error',
@@ -89,6 +111,8 @@ def update_item(item_id):
 
 @inventory_bp.route('/inventory/<item_id>', methods=['DELETE'])
 def delete_item(item_id):
+    print(f"DEBUG: Type of item_id in delete_item route: {type(item_id)}")
+    print(f"DEBUG: Value of item_id in delete_item route: {item_id}")
     try:
         if InventoryItem.delete(item_id):
             return jsonify({
@@ -99,6 +123,71 @@ def delete_item(item_id):
             'status': 'error',
             'message': 'Item not found'
         }), 404
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@inventory_bp.route('/inventory/summary', methods=['GET'])
+def get_inventory_summary():
+    try:
+        total_items = InventoryItem.count_all()
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'total_items': total_items
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@inventory_bp.route('/orders/summary', methods=['GET'])
+def get_orders_summary():
+    try:
+        # Assuming Order is a model similar to InventoryItem that can count all orders
+        # If not, you'll need to implement a count_all method in your Order model
+        total_orders = InventoryItem.count_all_orders() # Placeholder - needs actual Order model or direct DB query
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'total_orders': total_orders
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@inventory_bp.route('/routes/summary', methods=['GET'])
+def get_routes_summary():
+    try:
+        # For active routes, this is a placeholder. You'd need logic to determine "active"
+        active_routes_count = len(router.routes) # This counts all defined routes
+        return jsonify({
+            'status': 'success',
+            'data': {
+                'active_routes': active_routes_count
+            }
+        }), 200
+    except Exception as e:
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500
+
+@inventory_bp.route('/orders', methods=['GET'])
+def get_all_orders():
+    try:
+        orders = list(current_app.db.orders.find({}))
+        return jsonify({
+            'status': 'success',
+            'data': json.loads(json_util.dumps(orders))
+        }), 200
     except Exception as e:
         return jsonify({
             'status': 'error',

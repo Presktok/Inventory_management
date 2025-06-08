@@ -68,10 +68,10 @@
             </nav>
 
             <div class="sidebar-footer">
-                <button class="logout-btn">
+                <a href="{{ url_for('logout') }}" class="logout-btn">
                     <i data-feather="log-out"></i>
                     <span>Logout</span>
-                </button>
+                </a>
             </div>
         </aside>
 
@@ -473,69 +473,92 @@
                 
             } catch (error) {
                 console.error('Error creating user order:', error);
-                showMessage('userOrderError', 'Failed to create user order: ' + error.message, true);
+                showMessage('userOrderError', error.message || 'Failed to create user order', true);
             }
         });
 
-        // --- Processing All Orders ---
+        // --- Process All Orders Button Handling ---
         const processAllOrdersBtn = document.getElementById('processAllOrdersBtn');
 
         processAllOrdersBtn.addEventListener('click', async () => {
-            if(Object.keys(factoryToWarehouseOrdersData).length === 0 && 
-               Object.keys(warehouseToUserOrdersData).length === 0) {
-                showMessage('processError', 'No orders to process!', true);
-                return;
-            }
-
-            showMessage('orderStatus', 'Processing all orders...');
-
             try {
-                // Process factory to warehouse orders
-                for(const supplier in factoryToWarehouseOrdersData) {
-                    const orders = factoryToWarehouseOrdersData[supplier];
-                    if(orders.length > 0) {
-                        await orderApi.processOrders({
-                            type: 'factory_to_warehouse',
-                            supplier: supplier,
-                            orders: orders
-                        });
-                    }
+                const ordersToProcess = {};
+                if (Object.keys(factoryToWarehouseOrdersData).length > 0) {
+                    ordersToProcess.factory_to_warehouse = Object.values(factoryToWarehouseOrdersData).flat();
+                }
+                if (Object.keys(warehouseToUserOrdersData).length > 0) {
+                    ordersToProcess.warehouse_to_user = Object.values(warehouseToUserOrdersData).flat();
                 }
 
-                // Process warehouse to user orders
-                for(const user in warehouseToUserOrdersData) {
-                    const orders = warehouseToUserOrdersData[user];
-                    if(orders.length > 0) {
-                        await orderApi.processOrders({
-                            type: 'warehouse_to_user',
-                            user: user,
-                            orders: orders
-                        });
-                    }
+                if (Object.keys(ordersToProcess).length === 0) {
+                    showMessage('orderStatus', 'No orders to process.');
+                    return;
                 }
 
-                showMessage('orderStatus', 'Orders processed successfully!');
-
-                // Clear orders after processing
-                for(const supplier in factoryToWarehouseOrdersData) {
-                    factoryToWarehouseOrdersData[supplier] = [];
-                }
-                for(const user in warehouseToUserOrdersData) {
-                    warehouseToUserOrdersData[user] = [];
-                }
-                
+                const response = await orderApi.processOrders(ordersToProcess);
+                showMessage('orderStatus', response.message || 'Orders processed successfully!');
+                factoryToWarehouseOrdersData = {}; // Clear processed orders
+                warehouseToUserOrdersData = {}; // Clear processed orders
                 updateFactoryToWarehouseOrdersDisplay();
                 updateWarehouseToUserOrdersDisplay();
-                await loadInventoryItems(); // Reload inventory after processing
-
+                loadInventoryItems(); // Reload inventory to reflect stock changes
             } catch (error) {
                 console.error('Error processing orders:', error);
-                showMessage('processError', 'Failed to process orders: ' + error.message, true);
+                showMessage('processError', error.message || 'Failed to process orders.', true);
             }
         });
 
-        // Load inventory items when page loads
-        document.addEventListener('DOMContentLoaded', loadInventoryItems);
+        // Load initial data on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            loadInventoryItems();
+            loadOrders(); // Load existing orders
+        });
+
+        // Function to load existing orders
+        async function loadOrders() {
+            try {
+                const response = await orderApi.getAllOrders();
+                if (response.status === 'success') {
+                    // Clear existing data
+                    for (const key in factoryToWarehouseOrdersData) {
+                        delete factoryToWarehouseOrdersData[key];
+                    }
+                    for (const key in warehouseToUserOrdersData) {
+                        delete warehouseToUserOrdersData[key];
+                    }
+
+                    // Populate data from fetched orders
+                    response.data.forEach(order => {
+                        if (order.order_type === 'factory_to_warehouse') {
+                            const supplierName = order.user_id; // Assuming user_id is supplier_name for these orders
+                            if (!factoryToWarehouseOrdersData[supplierName]) {
+                                factoryToWarehouseOrdersData[supplierName] = [];
+                            }
+                            factoryToWarehouseOrdersData[supplierName].push(...order.products);
+                        } else if (order.order_type === 'warehouse_to_user') {
+                            const userName = order.user_id; // Assuming user_id is user_name for these orders
+                            if (!warehouseToUserOrdersData[userName]) {
+                                warehouseToUserOrdersData[userName] = [];
+                            }
+                            warehouseToUserOrdersData[userName].push(...order.products);
+                        }
+                    });
+                    updateFactoryToWarehouseOrdersDisplay();
+                    updateWarehouseToUserOrdersDisplay();
+                } else {
+                    console.error('Error loading orders:', response.message);
+                    showMessage('processError', 'Failed to load orders: ' + response.message, true);
+                }
+            } catch (error) {
+                console.error('Fetch error for orders:', error);
+                showMessage('processError', 'Failed to load orders.', true);
+            }
+        }
+
+        // --- Map Initialization and Functions (Assuming map.js handles actual map logic) ---
+        // Placeholder for map related functions and variables defined in map.js
+        // Ensure `locationMarkers` and `showRoute` are globally accessible if defined in map.js
+
     </script>
 </body>
 </html>

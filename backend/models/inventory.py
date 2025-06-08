@@ -25,11 +25,18 @@ class InventoryItem:
     def get_all():
         items = list(current_app.db.inventory.find())
         # Convert ObjectId to string for JSON serialization
-        return json.loads(json_util.dumps(items))
+        processed_items = []
+        for item in items:
+            if '_id' in item:
+                item['_id'] = str(item['_id'])
+            processed_items.append(item)
+        return json.loads(json_util.dumps(processed_items))
 
     @staticmethod
     def get_by_id(item_id):
         item = current_app.db.inventory.find_one({'_id': ObjectId(item_id)})
+        if item and '_id' in item:
+            item['_id'] = str(item['_id'])
         return json.loads(json_util.dumps(item)) if item else None
 
     @staticmethod
@@ -43,8 +50,18 @@ class InventoryItem:
 
     @staticmethod
     def delete(item_id):
-        result = current_app.db.inventory.delete_one({'_id': ObjectId(item_id)})
+        # Ensure item_id is a string before converting to ObjectId
+        item_id_str = str(item_id)
+        result = current_app.db.inventory.delete_one({'_id': ObjectId(item_id_str)})
         return result.deleted_count > 0
+
+    @staticmethod
+    def count_all():
+        return current_app.db.inventory.count_documents({})
+
+    @staticmethod
+    def count_all_orders():
+        return current_app.db.orders.count_documents({})
 
     @staticmethod
     def search(query):

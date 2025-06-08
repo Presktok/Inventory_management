@@ -1,9 +1,14 @@
-from flask import Flask, render_template, jsonify, request, redirect, url_for
+from flask import Flask, render_template, jsonify, request, redirect, url_for, session, flash
 from flask_cors import CORS
 from dotenv import load_dotenv
 from backend.config.database import init_db
 from backend.routes.inventory import inventory_bp
 import os
+import re
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+import secrets
+from pymongo import MongoClient
 
 # Load environment variables
 load_dotenv()
@@ -17,6 +22,7 @@ def create_app():
     # Configure app
     app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
     app.config['MONGO_DBNAME'] = os.getenv('MONGO_DBNAME', 'inventoryDB')
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', secrets.token_hex(32))
     
     # Enable CORS
     CORS(app, resources={
@@ -30,45 +36,157 @@ def create_app():
 
     # Initialize database
     init_db(app)
+    client = MongoClient(app.config['MONGO_URI'])
+    db = client[app.config['MONGO_DBNAME']]
+    users = db.users
 
     # Register blueprints
     app.register_blueprint(inventory_bp, url_prefix='/api')
 
+    # Password validation function
+    def validate_password(password):
+        if len(password) < 8:
+            return False, "Password must be at least 8 characters long"
+        if not re.search(r"[A-Z]", password):
+            return False, "Password must contain at least one uppercase letter"
+        if not re.search(r"[a-z]", password):
+            return False, "Password must contain at least one lowercase letter"
+        if not re.search(r"\d", password):
+            return False, "Password must contain at least one number"
+        if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
+            return False, "Password must contain at least one special character"
+        return True, "Password is valid"
+
+    # Email validation function
+    def validate_gmail(email):
+        pattern = r'^[a-zA-Z0-9._%+-]+@gmail\.com$'
+        return bool(re.match(pattern, email))
+
+    # Login required decorator
+    def login_required(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if 'user_id' not in session:
+                flash('Please login to access this page', 'error')
+                return redirect(url_for('login'))
+            return f(*args, **kwargs)
+        return decorated_function
+
     # Define routes
     @app.route('/')
-    def dashboard():
-       return render_template('dashboard.html')
-
-
-    @app.route('/index')
     def index():
+        return render_template('dashboard.html')
+
+    @app.route('/login', methods=['GET', 'POST'])
+    def login():
+        if 'user_id' in session:
+            return redirect(url_for('dashboard'))
+            
+        if request.method == 'POST':
+            email = request.form.get('email')
+            password = request.form.get('password')
+            
+            if not email or not password:
+                flash('Please fill in all fields', 'error')
+                return render_template('login.html')
+            
+            if not validate_gmail(email):
+                flash('Please use a valid Gmail address', 'error')
+                return render_template('login.html')
+            
+            # Find user in database
+            user = users.find_one({'email': email})
+            
+            if user and check_password_hash(user['password'], password):
+                session['user_id'] = str(user['_id'])
+                session['email'] = user['email']
+                flash('Login successful!', 'success')
+                return redirect(url_for('dashboard'))
+            else:
+                flash('Invalid email or password', 'error')
+                return render_template('login.html')
+                
+        return render_template('login.html')
+
+    @app.route('/dashboard')
+    @login_required
+    def dashboard():
         return render_template('index.html')
 
     @app.route('/inventory')
+    @login_required
     def inventory():
         return render_template('inventory.html')
 
     @app.route('/orders')
+    @login_required
     def orders():
         return render_template('orders.html')
 
     @app.route('/routes')
+    @login_required
     def routes():
         return render_template('routes.html')
 
-    @app.route('/login', methods=['GET', 'POST'])
-    def login():
-        if request.method == 'POST':
-            # Handle login logic here
-            return redirect(url_for('index'))
-        return render_template('login.html')
-
     @app.route('/signup', methods=['GET', 'POST'])
     def signup():
+        if 'user_id' in session:
+            return redirect(url_for('dashboard'))
+            
         if request.method == 'POST':
-            # Handle signup logic here
-            return redirect(url_for('login'))
+            email = request.form.get('email')
+            password = request.form.get('password')
+            confirm_password = request.form.get('confirmPassword')
+            first_name = request.form.get('firstName')
+            last_name = request.form.get('lastName')
+            
+            if not all([email, password, confirm_password, first_name, last_name]):
+                flash('Please fill in all fields', 'error')
+                return render_template('signup.html')
+            
+            if not validate_gmail(email):
+                flash('Please use a valid Gmail address', 'error')
+                return render_template('signup.html')
+            
+            if password != confirm_password:
+                flash('Passwords do not match', 'error')
+                return render_template('signup.html')
+            
+            is_valid, message = validate_password(password)
+            if not is_valid:
+                flash(message, 'error')
+                return render_template('signup.html')
+            
+            # Check if user already exists
+            if users.find_one({'email': email}):
+                flash('Email already registered', 'error')
+                return render_template('signup.html')
+            
+            # Create new user
+            hashed_password = generate_password_hash(password)
+            user_data = {
+                'email': email,
+                'password': hashed_password,
+                'first_name': first_name,
+                'last_name': last_name
+            }
+            
+            result = users.insert_one(user_data)
+            
+            if result.inserted_id:
+                flash('Account created successfully! Please login.', 'success')
+                return redirect(url_for('login'))
+            else:
+                flash('Error creating account. Please try again.', 'error')
+                return render_template('signup.html')
+                
         return render_template('signup.html')
+
+    @app.route('/logout')
+    def logout():
+        session.clear()
+        flash('You have been logged out successfully', 'success')
+        return redirect(url_for('index'))
 
     # Error handlers
     @app.errorhandler(404)

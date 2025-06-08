@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Sign Up | Logistics</title>
+    <title>Sign Up | Inventory Management</title>
     <meta name="description" content=" Logistics Management System" />
     <meta name="author" content="Iventory" />
 
@@ -25,6 +25,8 @@
         --border-radius: 8px;
         --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.1);
         --font-family: "Inter", sans-serif;
+        --error-color: #dc3545;
+        --success-color: #28a745;
       }
 
       * {
@@ -33,19 +35,19 @@
         padding: 0;
       }
 
-      body.auth-page {
+      body {
         background-color: #f2f2f2;
         font-family: var(--font-family);
         display: flex;
         justify-content: center;
         align-items: center;
-        height: 100vh;
+        min-height: 100vh;
+        padding: 20px;
       }
 
       .auth-container {
         max-width: 480px;
         width: 100%;
-        padding: 24px;
       }
 
       .auth-form-container {
@@ -53,10 +55,10 @@
         padding: 36px;
         border-radius: var(--border-radius);
         box-shadow: var(--shadow-md);
-        text-align: center;
       }
 
       .auth-logo {
+        text-align: center;
         margin-bottom: 28px;
       }
 
@@ -72,7 +74,6 @@
         border-radius: 12px;
         font-size: 20px;
         margin-bottom: 12px;
-        user-select: none;
       }
 
       .auth-logo h1 {
@@ -86,20 +87,20 @@
         color: var(--text-muted);
       }
 
+      .auth-card-header {
+        text-align: center;
+        margin-bottom: 24px;
+      }
+
       .auth-card-header h2 {
         font-size: 22px;
         font-weight: 600;
+        margin-bottom: 8px;
       }
 
       .auth-card-header p {
         font-size: 14px;
         color: var(--text-muted);
-        margin-top: 6px;
-        margin-bottom: 20px;
-      }
-
-      .auth-card-content form {
-        text-align: left;
       }
 
       .form-row {
@@ -113,16 +114,14 @@
         margin-bottom: 18px;
       }
 
-      .auth-form label {
+      .form-group label {
         display: block;
         font-size: 14px;
         margin-bottom: 6px;
         font-weight: 500;
       }
 
-      .auth-form input[type="text"],
-      .auth-form input[type="email"],
-      .auth-form input[type="password"] {
+      .form-group input {
         width: 100%;
         padding: 12px 14px;
         border: 1px solid var(--input-border);
@@ -132,7 +131,7 @@
         transition: border-color 0.3s ease;
       }
 
-      .auth-form input:focus {
+      .form-group input:focus {
         border-color: var(--primary-color);
         outline: none;
       }
@@ -171,6 +170,7 @@
         border-radius: var(--border-radius);
         cursor: pointer;
         transition: background 0.3s ease;
+        width: 100%;
       }
 
       .btn-primary {
@@ -180,10 +180,6 @@
 
       .btn-primary:hover {
         background-color: var(--primary-hover);
-      }
-
-      .btn-block {
-        width: 100%;
       }
 
       .auth-link-text {
@@ -204,80 +200,168 @@
         text-decoration: underline;
       }
 
-      .text-muted {
+      .flash-messages {
+        margin-bottom: 20px;
+      }
+
+      .flash-message {
+        padding: 12px;
+        border-radius: var(--border-radius);
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .flash-message.error {
+        background-color: #f8d7da;
+        color: var(--error-color);
+        border: 1px solid #f5c6cb;
+      }
+
+      .flash-message.success {
+        background-color: #d4edda;
+        color: var(--success-color);
+        border: 1px solid #c3e6cb;
+      }
+
+      .error-message {
+        color: var(--error-color);
+        font-size: 12px;
+        margin-top: 4px;
+        display: none;
+      }
+
+      .password-requirements {
+        font-size: 12px;
         color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      .password-requirements ul {
+        list-style: none;
+        padding-left: 0;
+        margin-top: 4px;
+      }
+
+      .password-requirements li {
+        margin-bottom: 2px;
+      }
+
+      .password-requirements li.valid {
+        color: var(--success-color);
+      }
+
+      .password-requirements li.invalid {
+        color: var(--error-color);
       }
     </style>
   </head>
 
-  <body class="auth-page">
+  <body>
     <div class="auth-container">
       <div class="auth-form-container">
         <div class="auth-logo">
-          <div class="logo-icon">DK</div>
-          <h1>Logistics</h1>
+          <div class="logo-icon">IM</div>
+          <h1>Inventory Management</h1>
           <p class="text-muted">Create a new account</p>
+        </div>
+
+        <div class="flash-messages">
+          {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
         </div>
 
         <div class="auth-card">
           <div class="auth-card-header">
             <h2>Sign Up</h2>
-            <p>Create an account to access the logistics platform</p>
+            <p>Create an account to access the platform</p>
           </div>
 
-          <div class="auth-card-content">
-<form id="signup-form" action="{{ url_for('signup') }}" method="POST" class="auth-form" novalidate>
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="firstName">First name</label>
-                  <input id="firstName" name="firstName" type="text" required />
-                </div>
-                <div class="form-group">
-                  <label for="lastName">Last name</label>
-                  <input id="lastName" name="lastName" type="text" required />
-                </div>
-              </div>
-
+          <form id="signup-form" action="{{ url_for('signup') }}" method="POST" class="auth-form" novalidate>
+            <div class="form-row">
               <div class="form-group">
-                <label for="email">Email address</label>
-                <input id="email" name="email" type="email" required />
+                <label for="firstName">First name</label>
+                <input id="firstName" name="firstName" type="text" required />
+                <div class="error-message" id="firstName-error"></div>
               </div>
-
               <div class="form-group">
-                <label for="password">Password</label>
-                <input id="password" name="password" type="password" required />
+                <label for="lastName">Last name</label>
+                <input id="lastName" name="lastName" type="text" required />
+                <div class="error-message" id="lastName-error"></div>
               </div>
-
-              <div class="form-group">
-                <label for="confirmPassword">Confirm password</label>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                />
-              </div>
-
-              <div class="form-check">
-                <input type="checkbox" id="agreeTerms" required />
-                <label for="agreeTerms" class="checkbox-label">
-                  I agree to the
-                  <a href="#" class="text-primary">terms of service</a> and
-                  <a href="#" class="text-primary">privacy policy</a>
-                </label>
-              </div>
-
-              <button type="submit" class="btn btn-primary btn-block">
-                Create account
-              </button>
-            </form>
-
-            <div class="auth-link-text">
-              <p class="text-muted">
-                Already have an account?
-                <a href="/login" class="text-primary">Sign in</a>
-              </p>
             </div>
+
+            <div class="form-group">
+              <label for="email">Email address</label>
+              <input 
+                id="email" 
+                name="email" 
+                type="email" 
+                required 
+                placeholder="you@gmail.com"
+                pattern="[a-zA-Z0-9._%+-]+@gmail\.com$"
+                title="Please enter a valid Gmail address"
+              />
+              <div class="error-message" id="email-error"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="password">Password</label>
+              <input 
+                id="password" 
+                name="password" 
+                type="password" 
+                required 
+                minlength="8"
+              />
+              <div class="error-message" id="password-error"></div>
+              <div class="password-requirements">
+                <p>Password must contain:</p>
+                <ul>
+                  <li id="length">At least 8 characters</li>
+                  <li id="uppercase">One uppercase letter</li>
+                  <li id="lowercase">One lowercase letter</li>
+                  <li id="number">One number</li>
+                  <li id="special">One special character</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="confirmPassword">Confirm password</label>
+              <input 
+                id="confirmPassword" 
+                name="confirmPassword" 
+                type="password" 
+                required 
+                minlength="8"
+              />
+              <div class="error-message" id="confirm-password-error"></div>
+            </div>
+
+            <div class="form-check">
+              <input type="checkbox" id="agreeTerms" required />
+              <label for="agreeTerms" class="checkbox-label">
+                I agree to the
+                <a href="#" class="text-primary">terms of service</a> and
+                <a href="#" class="text-primary">privacy policy</a>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create account</button>
+          </form>
+
+          <div class="auth-link-text">
+            <p class="text-muted">
+              Already have an account?
+              <a href="{{ url_for('login') }}" class="text-primary">Sign in</a>
+            </p>
           </div>
         </div>
       </div>
@@ -287,45 +371,159 @@
     <script src="https://cdn.gpteng.co/gptengineer.js" type="module"></script>
 
     <script>
-      document.addEventListener("DOMContentLoaded", () => {
-        const form = document.getElementById("signup-form");
+      document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('signup-form');
+        const firstNameInput = document.getElementById('firstName');
+        const lastNameInput = document.getElementById('lastName');
+        const emailInput = document.getElementById('email');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const agreeTermsInput = document.getElementById('agreeTerms');
 
-        form.addEventListener("submit", (e) => {
-          
+        // Error message elements
+        const firstNameError = document.getElementById('firstName-error');
+        const lastNameError = document.getElementById('lastName-error');
+        const emailError = document.getElementById('email-error');
+        const passwordError = document.getElementById('password-error');
+        const confirmPasswordError = document.getElementById('confirm-password-error');
 
-          const firstName = form.firstName.value.trim();
-          const lastName = form.lastName.value.trim();
-          const email = form.email.value.trim();
-          const password = form.password.value;
-          const confirmPassword = form.confirmPassword.value;
-          const agreeTerms = form.agreeTerms.checked;
+        // Password requirement elements
+        const lengthRequirement = document.getElementById('length');
+        const uppercaseRequirement = document.getElementById('uppercase');
+        const lowercaseRequirement = document.getElementById('lowercase');
+        const numberRequirement = document.getElementById('number');
+        const specialRequirement = document.getElementById('special');
 
-          if (!firstName || !lastName || !email || !password || !confirmPassword) {
-            alert("Please fill in all required fields.");
-            return;
-          }
+        function validateEmail(email) {
+          const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+          return gmailPattern.test(email);
+        }
 
-          if (password !== confirmPassword) {
-            alert("Passwords do not match.");
-            return;
-          }
+        function validatePassword(password) {
+          const requirements = {
+            length: password.length >= 8,
+            uppercase: /[A-Z]/.test(password),
+            lowercase: /[a-z]/.test(password),
+            number: /[0-9]/.test(password),
+            special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+          };
 
-          if (!agreeTerms) {
-            alert("You must agree to the terms of service and privacy policy.");
-            return;
-          }
+          // Update requirement indicators
+          lengthRequirement.className = requirements.length ? 'valid' : 'invalid';
+          uppercaseRequirement.className = requirements.uppercase ? 'valid' : 'invalid';
+          lowercaseRequirement.className = requirements.lowercase ? 'valid' : 'invalid';
+          numberRequirement.className = requirements.number ? 'valid' : 'invalid';
+          specialRequirement.className = requirements.special ? 'valid' : 'invalid';
 
-          // TODO: Replace this with your actual signup API call
-          console.log("Signing up with:", {
-            firstName,
-            lastName,
-            email,
-            password,
+          return Object.values(requirements).every(Boolean);
+        }
+
+        function validateName(name) {
+          return name.trim().length >= 2;
+        }
+
+        function validateForm() {
+          let isValid = true;
+
+          // Reset error messages
+          [firstNameError, lastNameError, emailError, passwordError, confirmPasswordError].forEach(el => {
+            el.style.display = 'none';
           });
 
-          alert("Signup successful! Redirecting...");
-          // Uncomment the line below to redirect after signup
-          // window.location.href = "/login.html";
+          // Validate first name
+          if (!validateName(firstNameInput.value)) {
+            firstNameError.textContent = 'First name must be at least 2 characters long';
+            firstNameError.style.display = 'block';
+            isValid = false;
+          }
+
+          // Validate last name
+          if (!validateName(lastNameInput.value)) {
+            lastNameError.textContent = 'Last name must be at least 2 characters long';
+            lastNameError.style.display = 'block';
+            isValid = false;
+          }
+
+          // Validate email
+          if (!validateEmail(emailInput.value)) {
+            emailError.textContent = 'Please enter a valid Gmail address';
+            emailError.style.display = 'block';
+            isValid = false;
+          }
+
+          // Validate password
+          if (!validatePassword(passwordInput.value)) {
+            passwordError.textContent = 'Password does not meet requirements';
+            passwordError.style.display = 'block';
+            isValid = false;
+          }
+
+          // Validate password confirmation
+          if (passwordInput.value !== confirmPasswordInput.value) {
+            confirmPasswordError.textContent = 'Passwords do not match';
+            confirmPasswordError.style.display = 'block';
+            isValid = false;
+          }
+
+          // Validate terms agreement
+          if (!agreeTermsInput.checked) {
+            isValid = false;
+          }
+
+          return isValid;
+        }
+
+        // Real-time validation
+        firstNameInput.addEventListener('input', function() {
+          if (!validateName(this.value)) {
+            firstNameError.textContent = 'First name must be at least 2 characters long';
+            firstNameError.style.display = 'block';
+          } else {
+            firstNameError.style.display = 'none';
+          }
+        });
+
+        lastNameInput.addEventListener('input', function() {
+          if (!validateName(this.value)) {
+            lastNameError.textContent = 'Last name must be at least 2 characters long';
+            lastNameError.style.display = 'block';
+          } else {
+            lastNameError.style.display = 'none';
+          }
+        });
+
+        emailInput.addEventListener('input', function() {
+          if (!validateEmail(this.value)) {
+            emailError.textContent = 'Please enter a valid Gmail address';
+            emailError.style.display = 'block';
+          } else {
+            emailError.style.display = 'none';
+          }
+        });
+
+        passwordInput.addEventListener('input', function() {
+          validatePassword(this.value);
+          if (!validatePassword(this.value)) {
+            passwordError.textContent = 'Password does not meet requirements';
+            passwordError.style.display = 'block';
+          } else {
+            passwordError.style.display = 'none';
+          }
+        });
+
+        confirmPasswordInput.addEventListener('input', function() {
+          if (this.value !== passwordInput.value) {
+            confirmPasswordError.textContent = 'Passwords do not match';
+            confirmPasswordError.style.display = 'block';
+          } else {
+            confirmPasswordError.style.display = 'none';
+          }
+        });
+
+        form.addEventListener('submit', function(e) {
+          if (!validateForm()) {
+            e.preventDefault();
+          }
         });
       });
     </script>

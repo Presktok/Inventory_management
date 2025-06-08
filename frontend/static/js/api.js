@@ -135,6 +135,21 @@ const orderApi = {
             console.error('Error getting nearby users:', error);
             throw error;
         }
+    },
+
+    // Get all orders
+    getAllOrders: async () => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/orders`, {
+                ...defaultOptions,
+                method: 'GET'
+            });
+            const data = await handleResponse(response);
+            return data;
+        } catch (error) {
+            console.error('Error fetching orders:', error);
+            throw error;
+        }
     }
 };
 
