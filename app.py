@@ -9,6 +9,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
 import secrets
 from pymongo import MongoClient
+from datetime import timedelta
+
+# Login required decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please login to access this page', 'error')
+            return redirect(url_for('login'))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # Load environment variables
 load_dotenv()
@@ -23,11 +34,12 @@ def create_app():
     app.config['MONGO_URI'] = os.getenv('MONGO_URI', 'mongodb://localhost:27017')
     app.config['MONGO_DBNAME'] = os.getenv('MONGO_DBNAME', 'inventoryDB')
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', secrets.token_hex(32))
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7) # Session lasts 7 days
     
     # Enable CORS
     CORS(app, resources={
         r"/*": {
-            "origins": "*",
+            "origins": ["http://localhost:5000", "http://127.0.0.1:5000"],
             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             "allow_headers": ["Content-Type", "Authorization"],
             "supports_credentials": True
@@ -35,13 +47,33 @@ def create_app():
     })
 
     # Initialize database
-    init_db(app)
+    try:
+        init_db(app)
+        print("MongoDB initialized successfully")
+    except Exception as e:
+        print(f"Error initializing MongoDB: {e}")
+        raise e
+
     client = MongoClient(app.config['MONGO_URI'])
     db = client[app.config['MONGO_DBNAME']]
     users = db.users
 
     # Register blueprints
     app.register_blueprint(inventory_bp, url_prefix='/api')
+
+    # Set Content Security Policy header
+    @app.after_request
+    def add_csp_header(response):
+        csp_policy = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com https://cdnjs.cloudflare.com; "
+            "font-src 'self' https://fonts.gstatic.com https://cdnjs.cloudflare.com; "
+            "img-src 'self' data: https://images.unsplash.com *.tile.openstreetmap.org; "
+            "connect-src 'self' http://localhost:5000 http://127.0.0.1:5000;"
+        )
+        response.headers['Content-Security-Policy'] = csp_policy
+        return response
 
     # Password validation function
     def validate_password(password):
@@ -62,16 +94,6 @@ def create_app():
         pattern = r'^[a-zA-Z0-9._%+-]+@gmail\.com$'
         return bool(re.match(pattern, email))
 
-    # Login required decorator
-    def login_required(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            if 'user_id' not in session:
-                flash('Please login to access this page', 'error')
-                return redirect(url_for('login'))
-            return f(*args, **kwargs)
-        return decorated_function
-
     # Define routes
     @app.route('/')
     def index():
@@ -79,9 +101,7 @@ def create_app():
 
     @app.route('/login', methods=['GET', 'POST'])
     def login():
-        if 'user_id' in session:
-            return redirect(url_for('dashboard'))
-            
+        
         if request.method == 'POST':
             email = request.form.get('email')
             password = request.form.get('password')
@@ -94,13 +114,18 @@ def create_app():
                 flash('Please use a valid Gmail address', 'error')
                 return render_template('login.html')
             
+            remember_me = request.form.get('rememberMe')
+
             # Find user in database
             user = users.find_one({'email': email})
             
             if user and check_password_hash(user['password'], password):
                 session['user_id'] = str(user['_id'])
                 session['email'] = user['email']
+                if remember_me:
+                    session.permanent = True
                 flash('Login successful!', 'success')
+
                 return redirect(url_for('dashboard'))
             else:
                 flash('Invalid email or password', 'error')
@@ -188,10 +213,18 @@ def create_app():
         flash('You have been logged out successfully', 'success')
         return redirect(url_for('index'))
 
+    @app.route('/favicon.ico')
+    def favicon():
+        return '', 204
+
     # Error handlers
     @app.errorhandler(404)
     def page_not_found(e):
-        return render_template('404.html'), 404
+        # Ensure the message is flashed only once
+        if not session.get('404_flashed'):
+            flash('The page you requested was not found.', 'error')
+            session['404_flashed'] = True
+        return redirect(url_for('index'))
 
     @app.errorhandler(500)
     def internal_server_error(e):
@@ -203,7 +236,7 @@ def create_app():
     return app
 
 if __name__ == '__main__':
-    app = create_app()  # Create the app instance
+    app = create_app()
     port = int(os.getenv('PORT', 5000))
     print(f"Starting the Flask app on port {port}...")
     app.run(host='0.0.0.0', port=port, debug=True)

@@ -36,7 +36,7 @@
     }
 
     html {
-      scroll-behavior: smooth;
+      scroll-behavior: auto;
     }
 
     body {
@@ -101,7 +101,6 @@
       font-weight: 500;
       font-size: 1rem;
       opacity: 0.9;
-      transition: all 0.2s ease;
       position: relative;
     }
 
@@ -113,7 +112,6 @@
       width: 0;
       height: 2px;
       background-color: var(--primary);
-      transition: width 0.3s ease;
     }
 
     .main-nav a:hover {
@@ -140,7 +138,6 @@
       color: var(--gray-300);
       font-size: 0.875rem;
       cursor: pointer;
-      transition: color 0.3s ease;
     }
 
     .location-selector:hover,
@@ -162,7 +159,6 @@
       padding: 0.5rem 1.25rem;
       border-radius: var(--radius-md);
       font-weight: 500;
-      transition: all 0.2s ease;
       cursor: pointer;
       text-decoration: none;
       border: none;
@@ -232,7 +228,6 @@
       color: var(--primary);
       border: 1px solid rgba(255, 140, 0, 0.3);
       cursor: pointer;
-      transition: all 0.3s ease;
       max-width: fit-content;
     }
 
@@ -280,7 +275,6 @@
       padding: 0.875rem 2rem;
       font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.3s ease;
       font-family: inherit;
     }
 
@@ -308,7 +302,6 @@
       padding: 0.375rem 1rem;
       border-radius: var(--radius-full);
       cursor: pointer;
-      transition: all 0.2s ease;
       font-size: 0.75rem;
       display: flex;
       align-items: center;
@@ -356,11 +349,9 @@
       border-radius: var(--radius-lg);
       overflow: hidden;
       box-shadow: var(--shadow-md);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
     }
 
     .card:hover {
-      transform: translateY(-5px);
       box-shadow: var(--shadow-lg);
     }
 
@@ -398,7 +389,6 @@
       display: flex;
       align-items: center;
       gap: 0.25rem;
-      transition: gap 0.3s ease;
       font-size: 0.875rem;
     }
 
@@ -540,7 +530,6 @@
     .footer-links a {
       color: var(--gray-400);
       text-decoration: none;
-      transition: color 0.2s ease;
       font-size: 0.875rem;
     }
 
@@ -569,7 +558,6 @@
     .footer-social a {
       color: var(--gray-400);
       font-size: 1.25rem;
-      transition: color 0.2s ease;
     }
 
     .footer-social a:hover {
@@ -687,7 +675,7 @@
         
         <div class="nav-container" id="navContainer">
           <nav class="main-nav">
-            <a href="#">All Categories</a>
+            <a href="/" class="active">All Categories</a>
             <a href="#">Featured Selections</a>
             <a href="#">Order Protections</a>
             <a href="#">Our Services</a>
@@ -816,98 +804,7 @@
     </div>
   </section>
 
-  <!-- Footer -->
-  <footer class="footer">
-    <div class="footer-container">
-      <div class="footer-grid">
-        <div class="footer-col">
-          <h3>About</h3>
-          <ul class="footer-links">
-            <li><a href="#">About Us</a></li>
-            <li><a href="#">Our Services</a></li>
-            <li><a href="#">Leadership</a></li>
-            <li><a href="#">Careers</a></li>
-            <li><a href="#">Press & News</a></li>
-          </ul>
-        </div>
-        
-        <div class="footer-col">
-          <h3>Products</h3>
-          <ul class="footer-links">
-            <li><a href="#">Inventory Management</a></li>
-            <li><a href="#">Order Fulfillment</a></li>
-            <li><a href="#">Analytics & Reporting</a></li>
-            <li><a href="#">Global Marketplace</a></li>
-            <li><a href="#">Supplier Network</a></li>
-          </ul>
-        </div>
-        
-        <div class="footer-col">
-          <h3>Resources</h3>
-          <ul class="footer-links">
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Documentation</a></li>
-            <li><a href="#">API Reference</a></li>
-            <li><a href="#">Community Forums</a></li>
-            <li><a href="#">Blog & Insights</a></li>
-          </ul>
-        </div>
-        
-        <div class="footer-col">
-          <h3>Legal</h3>
-          <ul class="footer-links">
-            <li><a href="#">Terms of Service</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Cookie Policy</a></li>
-            <li><a href="#">Service Level Agreement</a></li>
-            <li><a href="#">Compliance</a></li>
-          </ul>
-        </div>
-      </div>
-      
-      <div class="footer-bottom">
-        <div class="footer-copyright">
-          &copy; 2023 Inventory Management by Bandi.com. All rights reserved.
-        </div>
-        
-        <div class="footer-social">
-          <a href="#"><i class="fab fa-facebook"></i></a>
-          <a href="#"><i class="fab fa-twitter"></i></a>
-          <a href="#"><i class="fab fa-linkedin"></i></a>
-          <a href="#"><i class="fab fa-instagram"></i></a>
-          <a href="#"><i class="fab fa-youtube"></i></a>
-        </div>
-      </div>
-    </div>
-  </footer>
+    </main>
 
-  <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const form = document.querySelector('.auth-form');
-    
-    // Check if already logged in
-    if (sessionStorage.getItem('isLoggedIn')) {
-      window.location.href = 'index.html';
-    }
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-
-      // Simple validation (replace with real auth in production)
-      if (email === 'admin@example.com' && password === 'admin123') {
-        // Set session flag
-        sessionStorage.setItem('isLoggedIn', 'true');
-        
-        // Redirect to index
-        window.location.href = 'index.html';
-      } else {
-        alert('Invalid credentials! Try: admin@example.com / admin123');
-      }
-    });
-  });
-  </script>
 </body>
 </html>

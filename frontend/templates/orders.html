@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Orders | DaeKena Logistics</title>
+    <title>Orders | Inventory Logistics</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://unpkg.com/feather-icons"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@3.2.12/dist/leaflet-routing-machine.min.js"></script>
     <style>
         #routeMap {
             height: 400px;
@@ -45,14 +46,11 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon">DK</div>
-                    <span class="logo-text">DaeKena</span>
+                    <span class="logo-text">Inventory</span>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
-                <a href="{{ url_for('index') }}" class="nav-link">
-                    <span>Dashboard</span>
-                </a>
                 <a href="{{ url_for('inventory') }}" class="nav-link">
                     <span>Inventory</span>
                 </a>
@@ -106,8 +104,19 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="supplierName">Supplier Name</label>
-                                <input type="text" id="supplierName" required placeholder="Enter supplier name" />
+                                <label for="factoryId">Factory ID</label>
+                                <select id="factoryId" name="factory_id" required>
+                                    <option value="">Select Factory</option>
+                                    <option value="factory1">factory1</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="warehouseId">Warehouse ID</label>
+                                <select id="warehouseId" name="warehouse_id" required>
+                                    <option value="">Select Warehouse</option>
+                                    <option value="warehouse1">warehouse1</option>
+                                    <option value="warehouse2">warehouse2</option>
+                                </select>
                             </div>
                             <button type="button" id="addSupplierProductBtn" class="btn btn-outline">Add Another Product</button>
                             <button type="submit" class="btn btn-primary">Place Supplier Order</button>
@@ -372,13 +381,18 @@
 
         supplierOrderForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const supplierName = document.getElementById('supplierName').value.trim();
+            const factoryId = document.getElementById('factoryId').value.trim();
+            const warehouseId = document.getElementById('warehouseId').value.trim();
             
             try {
                 const products = gatherProducts(supplierProductsContainer, true);
                 
-                if(!supplierName) {
-                    showMessage('supplierOrderError', 'Please enter supplier name.', true);
+                if(!factoryId) {
+                    showMessage('supplierOrderError', 'Please select a Factory ID.', true);
+                    return;
+                }
+                if(!warehouseId) {
+                    showMessage('supplierOrderError', 'Please select a Warehouse ID.', true);
                     return;
                 }
                 if(products.length === 0) {
@@ -387,17 +401,18 @@
                 }
 
                 const orderData = {
-                    supplier_name: supplierName,
+                    factory_id: factoryId,
+                    warehouse_id: warehouseId,
                     products: products,
                     order_type: 'factory_to_warehouse'
                 };
                 
                 const response = await orderApi.createOrder(orderData);
                 
-                if(!factoryToWarehouseOrdersData[supplierName]) {
-                    factoryToWarehouseOrdersData[supplierName] = [];
+                if(!factoryToWarehouseOrdersData[factoryId]) {
+                    factoryToWarehouseOrdersData[factoryId] = [];
                 }
-                factoryToWarehouseOrdersData[supplierName].push(...products);
+                factoryToWarehouseOrdersData[factoryId].push(...products);
                 updateFactoryToWarehouseOrdersDisplay();
 
                 showMessage('supplierOrderStatus', 'Order created successfully!');

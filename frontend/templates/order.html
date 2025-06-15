@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Orders | DaeKena Logistics</title>
+    <title>Orders | Inventory Logistics</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     <script src="https://unpkg.com/feather-icons"></script>
 </head>
@@ -14,14 +14,11 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon">DK</div>
-                    <span class="logo-text">DaeKena</span>
+                    <span class="logo-text">Inventory</span>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
-                <a href="{{ url_for('index') }}" class="nav-link">
-                    <span>Dashboard</span>
-                </a>
                 <a href="{{ url_for('inventory') }}" class="nav-link">
                     <span>Inventory</span>
                 </a>

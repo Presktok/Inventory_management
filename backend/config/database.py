@@ -21,6 +21,7 @@ def init_db(app):
         
         # Test the connection
         client.admin.command('ping')
+        print("Successfully connected to MongoDB")
         
         # Get database instance
         db_name = app.config.get('MONGO_DBNAME', 'inventoryDB')
@@ -31,7 +32,7 @@ def init_db(app):
         app.db.users = app.db.get_collection('users')
         app.db.transactions = app.db.get_collection('transactions')
         
-        print("MongoDB connected successfully to database:", db_name)
+        print(f"MongoDB connected successfully to database: {db_name}")
         
     except ConnectionFailure as e:
         print(f"MongoDB connection error: {e}")

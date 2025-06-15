@@ -43,6 +43,21 @@ const inventoryApi = {
         }
     },
 
+    // Get inventory item by ID
+    getById: async (itemId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/inventory/${itemId}`, {
+                ...defaultOptions,
+                method: 'GET'
+            });
+            const data = await handleResponse(response);
+            return data;
+        } catch (error) {
+            console.error('Error fetching item by ID:', error);
+            throw error;
+        }
+    },
+
     // Create new inventory item
     createItem: async (itemData) => {
         try {
@@ -124,13 +139,13 @@ const orderApi = {
     getNearbyUsers: async (orderId, userId, maxDistance) => {
         try {
             const response = await fetch(
-                `${API_BASE_URL}/orders/${orderId}/nearby-users?user_id=${userId}&max_distance=${maxDistance}`
+                `${API_BASE_URL}/orders/${orderId}/nearby-users?user_id=${userId}&max_distance=${maxDistance}`,
+                {
+                    ...defaultOptions,
+                    method: 'GET'
+                }
             );
-            const data = await response.json();
-            if (data.status === 'success') {
-                return data.data;
-            }
-            throw new Error(data.message || 'Failed to get nearby users');
+            return handleResponse(response);
         } catch (error) {
             console.error('Error getting nearby users:', error);
             throw error;
@@ -148,60 +163,6 @@ const orderApi = {
             return data;
         } catch (error) {
             console.error('Error fetching orders:', error);
-            throw error;
-        }
-    }
-};
-
-// Route API functions
-const routeApi = {
-    // Get factory to warehouse route
-    getFactoryToWarehouseRoute: async (factoryId) => {
-        try {
-            const response = await fetch(
-                `${API_BASE_URL}/route/factory-to-warehouse?factory_id=${encodeURIComponent(factoryId)}`,
-                {
-                    ...defaultOptions,
-                    method: 'GET'
-                }
-            );
-            return handleResponse(response);
-        } catch (error) {
-            console.error('Error getting factory route:', error);
-            throw error;
-        }
-    },
-
-    // Get warehouse to user route
-    getWarehouseToUserRoute: async (warehouseId, userId) => {
-        try {
-            const response = await fetch(
-                `${API_BASE_URL}/route/warehouse-to-user?warehouse_id=${encodeURIComponent(warehouseId)}&user_id=${encodeURIComponent(userId)}`,
-                {
-                    ...defaultOptions,
-                    method: 'GET'
-                }
-            );
-            return handleResponse(response);
-        } catch (error) {
-            console.error('Error getting warehouse route:', error);
-            throw error;
-        }
-    },
-
-    // Get user to user route
-    getUserToUserRoute: async (fromUser, toUser) => {
-        try {
-            const response = await fetch(
-                `${API_BASE_URL}/route/user-to-user?from_user=${encodeURIComponent(fromUser)}&to_user=${encodeURIComponent(toUser)}`,
-                {
-                    ...defaultOptions,
-                    method: 'GET'
-                }
-            );
-            return handleResponse(response);
-        } catch (error) {
-            console.error('Error getting user route:', error);
             throw error;
         }
     }

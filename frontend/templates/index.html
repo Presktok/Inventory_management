@@ -69,21 +69,18 @@
             <div class="sidebar-header">
                 <div class="logo">
                     <div class="logo-icon">DK</div>
-                    <span class="logo-text">DaeKena</span>
+                    <span class="logo-text">Inventory</span>
                 </div>
             </div>
 
             <nav class="sidebar-nav">
-                <a href="{{ url_for('index') }}" class="nav-link nav-link-active">
-                    <span>Dashboard</span>
-                </a>
                 <a href="{{ url_for('inventory') }}" class="nav-link">
                     <span>Inventory</span>
                 </a>
                 <a href="{{ url_for('orders') }}" class="nav-link">
                     <span>Orders</span>
                 </a>
-                <a href="routes.html" class="nav-link">
+                <a href="{{ url_for('routes') }}" class="nav-link">
                     <span>Routes</span>
                 </a>
                 <a href="#" class="nav-link">
@@ -152,50 +149,5 @@
             </div>
         </main>
     </div>
-
-    <script>
-        feather.replace();
-
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Fetch Total Orders
-            try {
-                const ordersResponse = await fetch('/api/orders/summary');
-                const ordersData = await ordersResponse.json();
-                if (ordersData.status === 'success') {
-                    document.querySelector('.dashboard-card:nth-child(1) .stat').textContent = ordersData.data.total_orders.toLocaleString();
-                } else {
-                    console.error('Error fetching total orders:', ordersData.message);
-                }
-            } catch (error) {
-                console.error('Fetch error for total orders:', error);
-            }
-
-            // Fetch Inventory Items
-            try {
-                const inventoryResponse = await fetch('/api/inventory/summary');
-                const inventoryData = await inventoryResponse.json();
-                if (inventoryData.status === 'success') {
-                    document.querySelector('.dashboard-card:nth-child(2) .stat').textContent = inventoryData.data.total_items.toLocaleString();
-                } else {
-                    console.error('Error fetching inventory items:', inventoryData.message);
-                }
-            } catch (error) {
-                console.error('Fetch error for inventory items:', error);
-            }
-
-            // Fetch Active Routes
-            try {
-                const routesResponse = await fetch('/api/routes/summary');
-                const routesData = await routesResponse.json();
-                if (routesData.status === 'success') {
-                    document.querySelector('.dashboard-card:nth-child(3) .stat').textContent = routesData.data.active_routes.toLocaleString();
-                } else {
-                    console.error('Error fetching active routes:', routesData.message);
-                }
-            } catch (error) {
-                console.error('Fetch error for active routes:', error);
-            }
-        });
-    </script>
 </body>
 </html>

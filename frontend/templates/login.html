@@ -276,8 +276,8 @@
             </div>
             
             <div class="form-check">
-              <input type="checkbox" id="remember-me" aria-label="Remember me">
-              <label for="remember-me" class="checkbox-label">Remember me</label>
+              <input type="checkbox" id="rememberMe" name="rememberMe">
+              <label class="checkbox-label" for="rememberMe">Remember me</label>
             </div>
             
             <button type="submit" class="btn btn-primary btn-block">
@@ -295,69 +295,5 @@
       </div>
     </div>
   </div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const form = document.querySelector('.auth-form');
-      const emailInput = document.getElementById('email');
-      const passwordInput = document.getElementById('password');
-      const emailError = document.getElementById('email-error');
-      const passwordError = document.getElementById('password-error');
-
-      function validateEmail(email) {
-        const gmailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-        return gmailPattern.test(email);
-      }
-
-      function validatePassword(password) {
-        return password.length >= 8;
-      }
-
-      form.addEventListener('submit', function(e) {
-        let isValid = true;
-        
-        // Reset error messages
-        emailError.style.display = 'none';
-        passwordError.style.display = 'none';
-
-        // Validate email
-        if (!validateEmail(emailInput.value)) {
-          emailError.textContent = 'Please enter a valid Gmail address';
-          emailError.style.display = 'block';
-          isValid = false;
-        }
-
-        // Validate password
-        if (!validatePassword(passwordInput.value)) {
-          passwordError.textContent = 'Password must be at least 8 characters long';
-          passwordError.style.display = 'block';
-          isValid = false;
-        }
-
-        if (!isValid) {
-          e.preventDefault();
-        }
-      });
-
-      // Real-time validation
-      emailInput.addEventListener('input', function() {
-        if (!validateEmail(this.value)) {
-          emailError.textContent = 'Please enter a valid Gmail address';
-          emailError.style.display = 'block';
-        } else {
-          emailError.style.display = 'none';
-        }
-      });
-
-      passwordInput.addEventListener('input', function() {
-        if (!validatePassword(this.value)) {
-          passwordError.textContent = 'Password must be at least 8 characters long';
-          passwordError.style.display = 'block';
-        } else {
-          passwordError.style.display = 'none';
-        }
-      });
-    });
-  </script>
 </body>
 </html>

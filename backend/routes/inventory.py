@@ -69,22 +69,31 @@ def get_item_by_id(item_id):
 @inventory_bp.route('/inventory', methods=['POST'])
 def create_item():
     try:
+        print("Received create_item request")
         data = request.get_json()
+        print("Request data:", data)
+        
         required_fields = ['name', 'quantity', 'category', 'price']
         
         if not all(field in data for field in required_fields):
+            print("Missing required fields. Required:", required_fields)
+            print("Received:", data.keys())
             return jsonify({
                 'status': 'error',
                 'message': 'Missing required fields'
             }), 400
 
+        print("Creating item in database...")
         item_id = InventoryItem.create(data)
+        print("Item created successfully with ID:", item_id)
+        
         return jsonify({
             'status': 'success',
             'message': 'Item created successfully',
             'item_id': item_id
         }), 201
     except Exception as e:
+        print("Error creating item:", str(e))
         return jsonify({
             'status': 'error',
             'message': str(e)
@@ -204,6 +213,13 @@ def create_order():
                 'message': 'No data provided in request'
             }), 400
         
+        # Initialize order_data with common fields
+        order_data = {
+            'order_type': data.get('order_type'),
+            'products': data.get('products'),
+            'timestamp': datetime.utcnow()
+        }
+
         # Validate required fields based on order type
         if 'order_type' not in data:
             return jsonify({
@@ -238,92 +254,64 @@ def create_order():
                         'message': f"Insufficient stock for {product['orderName']}. Available: {item['quantity']}, Requested: {product['quantity']}"
                     }), 400
 
-        if data['order_type'] == 'factory_to_warehouse':
-            if 'supplier_name' not in data:
+        elif data['order_type'] == 'factory_to_warehouse':
+            if 'factory_id' not in data or 'warehouse_id' not in data:
                 return jsonify({
                     'status': 'error',
-                    'message': 'Supplier name is required for factory to warehouse orders'
+                    'message': 'Factory ID and Warehouse ID are required for factory_to_warehouse orders'
                 }), 400
-            
-            # Validate products format
             for product in data['products']:
                 if 'orderName' not in product or 'quantity' not in product:
                     return jsonify({
                         'status': 'error',
-                        'message': f"Invalid product data: {product}"
+                        'message': f"Invalid product data for factory_to_warehouse: {product}"
                     }), 400
-                if not isinstance(product['quantity'], (int, float)) or product['quantity'] <= 0:
-                    return jsonify({
-                        'status': 'error',
-                        'message': f"Invalid quantity for product {product['orderName']}: {product['quantity']}"
-                    }), 400
-                
-            # Create order with supplier info
-            order = Order(
-                order_id=str(ObjectId()),
-                user_id=data['supplier_name'],
-                warehouse_id='warehouse1',
-                items=data['products'],
-                timestamp=datetime.utcnow()
-            )
+                # For factory_to_warehouse, we increase the stock in general inventory
+                # Assuming InventoryItem.update_stock handles the general stock regardless of location in the model
+                InventoryItem.update_stock(product['orderName'], product['quantity'])
+            order_data['source_factory_id'] = data['factory_id']
+            order_data['destination_warehouse_id'] = data['warehouse_id']
 
-        elif data['order_type'] == 'warehouse_to_user':
-            if 'user_name' not in data:
+        elif data['order_type'] == 'user_to_user':
+            if 'source_user_id' not in data or 'destination_user_id' not in data:
                 return jsonify({
                     'status': 'error',
-                    'message': 'User name is required for warehouse to user orders'
+                    'message': 'Source User ID and Destination User ID are required for user_to_user orders'
                 }), 400
-                
-            # Create order with user info
-            order = Order(
-                order_id=str(ObjectId()),
-                user_id=data['user_name'],
-                warehouse_id='warehouse1',
-                items=data['products'],
-                timestamp=datetime.utcnow()
-            )
+            for product in data['products']:
+                if 'orderName' not in product or 'quantity' not in product:
+                    return jsonify({
+                        'status': 'error',
+                        'message': f"Invalid product data for user_to_user: {product}"
+                    }), 400
+                # For user_to_user, reduce stock from source user and add to destination user (conceptual)
+                # This would require a more complex user-specific inventory tracking
+                # For now, we'll just log this and not modify central inventory for this type
+                print(f"DEBUG: User to user transfer of {product['quantity']} of {product['orderName']}")
+
+            order_data['source_user_id'] = data['source_user_id']
+            order_data['destination_user_id'] = data['destination_user_id']
+        
         else:
             return jsonify({
                 'status': 'error',
                 'message': 'Invalid order type'
             }), 400
-        
-        try:
-            router.add_order(order)
-        except Exception as e:
-            return jsonify({
-                'status': 'error',
-                'message': f'Failed to add order to router: {str(e)}'
-            }), 500
-        
-        # Process the order immediately
-        try:
-            result = router.process_next_order()
-            if result:
-                order, route = result
-                # Convert route location IDs to coordinates
-                route_locations = route  # Keep the location IDs for the frontend to use
-                return jsonify({
-                    'status': 'success',
-                    'message': 'Order created and processed successfully',
-                    'order_id': order.order_id,
-                    'route': route_locations
-                }), 201
-            else:
-                return jsonify({
-                    'status': 'error',
-                    'message': 'Could not process order - no valid route found'
-                }), 400
-        except Exception as e:
-            return jsonify({
-                'status': 'error',
-                'message': f'Failed to process order: {str(e)}'
-            }), 500
-            
+
+        # Insert the order into the database
+        order_id = current_app.db.orders.insert_one(order_data).inserted_id
+
+        # Return success response
+        return jsonify({
+            'status': 'success',
+            'message': 'Order created successfully',
+            'order_id': str(order_id)
+        }), 201
     except Exception as e:
+        print("Error creating order:", str(e))
         return jsonify({
             'status': 'error',
-            'message': f'Failed to create order: {str(e)}'
+            'message': str(e)
         }), 500
 
 @inventory_bp.route('/orders/process', methods=['POST'])
