@@ -30,6 +30,14 @@ build/
 # Database
 *.db
 *.sqlite3
+data/db/
+*.wt
+*.wt.turtle
+*.wt.lock
+mongod.lock
+storage.bson
+diagnostic.data/
+journal/
 
 # Logs
 *.log
